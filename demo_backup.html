@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html >
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+    <title>小例子--刮刮卡--注释备份</title>
+    <style type="text/css">
+        *{margin: 0; padding: 0; list-style: none; text-decoration: none;}
+        .box{width: 300px; margin: 100px auto;}
+        a:hover{ text-decoration: underline;}
+    </style>
+</head>
+<body>
+<div class="box">
+    <div class="msg">
+        刮开颜色遮挡部分看看，
+        <a href="javascript:void(0);" onclick="window.location.reload()">再来一次</a>
+    </div>
+    <br />
+    <div class="guagua">
+        <canvas width="320" height="160"></canvas>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+    /*禁用页面的鼠标选中拖动事件*/
+    var bodyStyle=document.body.style;
+    bodyStyle.mozUserSelect="none";
+    bodyStyle.webkitUserSelect="none";
+    /*定义图片类，获取canvas元素*/
+    var img=new Image(),
+        canvas=document.querySelector("canvas");/*类似JQ的$("canvas")查找选择器*/
+    canvas.style.backgroundColor="transparent";
+    canvas.style.position="absolute";
+    /*定义图片数组，刷新时随机出现一张*/
+    var imgs=['thx.jpg','ward.jpg'],
+        num=Math.floor(Math.random()*2);/*Math.random() * 2 生成0和2之间的随机小数，Math.floor(Math.random() * 2)生成0和2之间的随机整数*/
+    img.src=imgs[num];/*随机选取一张做背景*/
+    /*addEventListener() 方法用于向指定元素添加事件句柄。*/
+    img.addEventListener('load', function(e){
+    var ctx,
+        w=img.width,
+        h=img.height,
+        offsetX=canvas.offsetLeft,
+        offsetY=canvas.offsetTop,/*发生事件的地点在事件源元素的坐标系统中的 x 坐标和 y 坐标。*/
+        mousedown=false;
+    /*绘制矩形*/
+    function layer(ctx){
+        ctx.fillStyle='pink';/*fillStyle属性设置或返回用于填充绘画的颜色、渐变或模式*/
+        ctx.fillRect(0, 0, w, h);/*fillRect()方法绘制“被填充”的矩形*/
+    }
+    /*鼠标按下事件*/
+    function eventDown(e){
+        e.preventDefault();/*取消事件的默认动作。*/
+        mousedown=true;
+    }
+    /*鼠标松开事件*/
+    function eventUp(e){
+        e.preventDefault();
+        mousedown=false;
+    }
+    /*鼠标移动事件*/
+    function eventMove(e){
+        e.preventDefault();
+        if(mousedown){
+            if(e.changedTouches){
+                e=e.changedTouches[e.changedTouches.length-1];
+            }
+            /*获取坐标位置*/
+            var x=(e.clientX+document.body.scrollLeft || e.pageX) - offsetX || 0,
+                y=(e.clientY+document.body.scrollTop || e.pageY) - offsetY || 0 ;
+            with(ctx){
+                beginPath()
+                arc(x, y, 20, 0, Math.PI*2);/*绘制圆点*/
+                fill();
+            }
+        }
+    }
+    /*canvas调用以上函数，绘制图形*/
+    canvas.width=w;
+    canvas.height=h;
+    canvas.style.backgroundImage='url('+img.src+')';
+    ctx=canvas.getContext("2d");
+    ctx.fillStyle="transparent";
+    ctx.fillRect(0, 0, w, h);/*绘制矩形*/
+    layer(ctx);
+    /*globalCompositeOperation 属性设置或返回如何将一个源（新的）图像绘制到目标（已有）的图像上。*/
+    ctx.globalCompositeOperation='destination-out';/*destination-out在源图像外显示目标图像。只有源图像外的目标图像部分会被显示，源图像是透明的。*/
+    canvas.addEventListener('touchstart',eventDown);
+    canvas.addEventListener('touchend',eventUp);
+    canvas.addEventListener('touchmove', eventMove);
+    canvas.addEventListener('mousedown',eventDown);
+    canvas.addEventListener('mouseup',eventUp);
+    canvas.addEventListener('mousemove',eventMove);
+    });
+</script>
+</html>
